@@ -1,8 +1,8 @@
 // src/Pages/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginInstitute } from "../Services/userApi";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { loginInstitute, loginManager } from "../Services/userApi";
+import { Eye, EyeOff, Mail, Lock, UserCircle, ShieldCheck } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -11,30 +11,45 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState("admin"); // "admin" or "user"
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Call institute login API
-      const res = await loginInstitute({ email, password });
-      // Response should contain: { institute_id, name, email, token }
+      let res;
+      if (role === "admin") {
+        // Institute login
+        res = await loginInstitute({ email, password });
+      } else {
+        // Manager login
+        res = await loginManager({ email, password });
+      }
 
       // Store data in localStorage
       if (res.data.institute_id) {
         localStorage.setItem("instituteId", res.data.institute_id);
       }
-      localStorage.setItem("coachingName", res.data.name || res.data.coachingName);
-      localStorage.setItem("instituteName", res.data.name);
+      if (res.data.manager_id) {
+        localStorage.setItem("managerId", res.data.manager_id);
+      }
+
+      localStorage.setItem("coachingName", res.data.name || res.data.coachingName || "User");
+      localStorage.setItem("instituteName", res.data.name || "Institute");
       localStorage.setItem("userEmail", res.data.email);
       localStorage.setItem("email", res.data.email);
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("role", role);
 
-      // Navigate to dashboard
-      navigate("/dashboard");
+      // Navigate based on role
+      if (role === "user") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
-      alert("Login failed. Check your email and password.");
+      alert("Login failed. Check your email, password, and selected role.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -62,10 +77,37 @@ export default function Login() {
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Welcome to Attendify</h2>
-          <p className="text-gray-500 text-center mb-8">Login to manage your coaching center.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">Welcome Back</h2>
+          <p className="text-gray-500 text-center mb-6">Select your role and login to continue.</p>
 
           <form onSubmit={handleLogin} className="space-y-6">
+
+            {/* Role Selection */}
+            <div className="grid grid-cols-2 gap-4 p-1 bg-gray-50 rounded-xl border border-gray-200">
+              <button
+                type="button"
+                onClick={() => setRole("admin")}
+                className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${role === "admin"
+                  ? "bg-white text-blue-600 shadow-sm border border-gray-200"
+                  : "text-gray-500 hover:text-gray-700"
+                  }`}
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("user")}
+                className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${role === "user"
+                  ? "bg-white text-blue-600 shadow-sm border border-gray-200"
+                  : "text-gray-500 hover:text-gray-700"
+                  }`}
+              >
+                <UserCircle className="w-4 h-4" />
+                User
+              </button>
+            </div>
+
             {/* Email Input */}
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -121,7 +163,7 @@ export default function Login() {
               disabled={loading}
               className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading ? "Logging in..." : `Login as ${role === "admin" ? "Admin" : "User"}`}
             </button>
           </form>
 

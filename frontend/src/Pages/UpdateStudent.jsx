@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   updateStudent,
   deactivateStudent,
@@ -8,7 +7,6 @@ import {
 import Sidebar from "../Components/Sidebar";
 
 export default function UpdateStudent() {
-  const navigate = useNavigate();
   const [student, setStudent] = useState(null);
   const [studentId, setStudentId] = useState("");
 
@@ -34,19 +32,25 @@ export default function UpdateStudent() {
   };
 
   /* Class → Stream Logic */
+  /* Class → Stream Logic */
   useEffect(() => {
     if (!student) return;
 
     if (student.classLevel === "11" || student.classLevel === "12") {
-      setStudent((prev) => ({ ...prev, stream: "", board: "" }));
+      // Only update if not already set correctly to avoid infinite loop
+      if (student.stream !== "" || student.board !== "") {
+        setStudent((prev) => ({ ...prev, stream: "", board: "" }));
+      }
     } else {
-      setStudent((prev) => ({
-        ...prev,
-        stream: "Foundation",
-        board: "",
-      }));
+      if (student.stream !== "Foundation" || student.board !== "") {
+        setStudent((prev) => ({
+          ...prev,
+          stream: "Foundation",
+          board: "",
+        }));
+      }
     }
-  }, [student?.classLevel]);
+  }, [student]);
 
   const handleUpdate = async () => {
     try {

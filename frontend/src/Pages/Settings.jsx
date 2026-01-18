@@ -20,7 +20,7 @@ export default function Settings() {
     activeBatches: 0,
   });
   const [loading, setLoading] = useState(true);
-  
+
   // Password update state
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -33,81 +33,81 @@ export default function Settings() {
   const [logoUrl, setLogoUrl] = useState("");
 
   useEffect(() => {
+    const loadInstituteInfo = async () => {
+      try {
+        // Try to get full institute details from API
+        const res = await getCurrentInstitute();
+        if (res.data) {
+          setInstituteInfo(res.data);
+          // Set logo URL if available
+          if (res.data.logo_url || res.data.logo) {
+            setLogoUrl(res.data.logo_url || res.data.logo);
+          } else {
+            // Try to get from localStorage or use default
+            const storedLogo = localStorage.getItem("instituteLogo");
+            setLogoUrl(storedLogo || "");
+          }
+        } else {
+          // Fallback to localStorage if API fails
+          loadFromLocalStorage();
+        }
+      } catch (err) {
+        console.error("Failed to load institute from API, using localStorage:", err);
+        // Fallback to localStorage
+        loadFromLocalStorage();
+      }
+    };
+
+    const loadFromLocalStorage = () => {
+      const instituteId = localStorage.getItem("instituteId");
+      const instituteName = localStorage.getItem("instituteName") || localStorage.getItem("coachingName");
+      const email = localStorage.getItem("email") || localStorage.getItem("userEmail");
+      const storedLogo = localStorage.getItem("instituteLogo");
+
+      setInstituteInfo({
+        institute_id: instituteId,
+        name: instituteName || "Not Set",
+        email: email || "Not Set",
+      });
+      setLogoUrl(storedLogo || "");
+    };
+
+    const loadAllData = async () => {
+      setLoading(true);
+      try {
+        // Load batches
+        const batchesRes = await getAllBatches();
+        const batchesData = batchesRes.data || [];
+        setBatches(batchesData);
+
+        // Load subjects
+        const subjectsRes = await getAllSubjects();
+        const subjectsData = subjectsRes.data || [];
+        setSubjects(subjectsData);
+
+        // Load students
+        const studentsRes = await getAllStudents();
+        const studentsData = studentsRes.data || [];
+        setStudents(studentsData);
+
+        // Calculate stats
+        setStats({
+          totalBatches: batchesData.length,
+          totalSubjects: subjectsData.length,
+          totalStudents: studentsData.length,
+          activeBatches: batchesData.filter((b) => b.total_strength > 0).length,
+        });
+      } catch (err) {
+        console.error("Error loading data:", err);
+        alert("Failed to load some data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadAllData();
     loadInstituteInfo();
   }, []);
-
-  const loadInstituteInfo = async () => {
-    try {
-      // Try to get full institute details from API
-      const res = await getCurrentInstitute();
-      if (res.data) {
-        setInstituteInfo(res.data);
-        // Set logo URL if available
-        if (res.data.logo_url || res.data.logo) {
-          setLogoUrl(res.data.logo_url || res.data.logo);
-        } else {
-          // Try to get from localStorage or use default
-          const storedLogo = localStorage.getItem("instituteLogo");
-          setLogoUrl(storedLogo || "");
-        }
-      } else {
-        // Fallback to localStorage if API fails
-        loadFromLocalStorage();
-      }
-    } catch (err) {
-      console.error("Failed to load institute from API, using localStorage:", err);
-      // Fallback to localStorage
-      loadFromLocalStorage();
-    }
-  };
-
-  const loadFromLocalStorage = () => {
-    const instituteId = localStorage.getItem("instituteId");
-    const instituteName = localStorage.getItem("instituteName") || localStorage.getItem("coachingName");
-    const email = localStorage.getItem("email") || localStorage.getItem("userEmail");
-    const storedLogo = localStorage.getItem("instituteLogo");
-
-    setInstituteInfo({
-      institute_id: instituteId,
-      name: instituteName || "Not Set",
-      email: email || "Not Set",
-    });
-    setLogoUrl(storedLogo || "");
-  };
-
-  const loadAllData = async () => {
-    setLoading(true);
-    try {
-      // Load batches
-      const batchesRes = await getAllBatches();
-      const batchesData = batchesRes.data || [];
-      setBatches(batchesData);
-
-      // Load subjects
-      const subjectsRes = await getAllSubjects();
-      const subjectsData = subjectsRes.data || [];
-      setSubjects(subjectsData);
-
-      // Load students
-      const studentsRes = await getAllStudents();
-      const studentsData = studentsRes.data || [];
-      setStudents(studentsData);
-
-      // Calculate stats
-      setStats({
-        totalBatches: batchesData.length,
-        totalSubjects: subjectsData.length,
-        totalStudents: studentsData.length,
-        activeBatches: batchesData.filter((b) => b.total_strength > 0).length,
-      });
-    } catch (err) {
-      console.error("Error loading data:", err);
-      alert("Failed to load some data");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -145,7 +145,7 @@ export default function Settings() {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
       });
-      
+
       alert("Password updated successfully!");
       setPasswordData({
         currentPassword: "",
@@ -268,116 +268,116 @@ export default function Settings() {
               {/* Institute Information */}
               <div className="lg:col-span-2">
                 <div className="bg-white p-4 md:p-6 rounded-lg shadow-md">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
-                <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
-                  Institute Information
-                </h2>
-                <button
-                  onClick={() => setShowPasswordForm(!showPasswordForm)}
-                  className="bg-blue-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded hover:bg-blue-700 transition text-sm md:text-base"
-                >
-                  {showPasswordForm ? "Cancel" : "Update Password"}
-                </button>
-              </div>
-
-              {/* Password Update Form */}
-              {showPasswordForm && (
-                <div className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg border-2 border-blue-200">
-                  <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4 text-gray-700">
-                    Change Password
-                  </h3>
-                  <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Current Password *
-                      </label>
-                      <input
-                        type="password"
-                        name="currentPassword"
-                        value={passwordData.currentPassword}
-                        onChange={handlePasswordChange}
-                        className="w-full p-2 border rounded focus:outline-blue-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        New Password *
-                      </label>
-                      <input
-                        type="password"
-                        name="newPassword"
-                        value={passwordData.newPassword}
-                        onChange={handlePasswordChange}
-                        className="w-full p-2 border rounded focus:outline-blue-500"
-                        required
-                        minLength={6}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Confirm New Password *
-                      </label>
-                      <input
-                        type="password"
-                        name="confirmPassword"
-                        value={passwordData.confirmPassword}
-                        onChange={handlePasswordChange}
-                        className="w-full p-2 border rounded focus:outline-blue-500"
-                        required
-                        minLength={6}
-                      />
-                    </div>
-                    {passwordError && (
-                      <div className="text-red-600 text-sm">{passwordError}</div>
-                    )}
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2 sm:gap-0">
+                    <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+                      Institute Information
+                    </h2>
                     <button
-                      type="submit"
-                      disabled={passwordLoading}
-                      className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:bg-gray-400"
+                      onClick={() => setShowPasswordForm(!showPasswordForm)}
+                      className="bg-blue-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded hover:bg-blue-700 transition text-sm md:text-base"
                     >
-                      {passwordLoading ? "Updating..." : "Update Password"}
+                      {showPasswordForm ? "Cancel" : "Update Password"}
                     </button>
-                  </form>
-                </div>
-              )}
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Institute ID</p>
-                  <p className="font-semibold text-lg">
-                    {instituteInfo.institute_id || "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Institute Name</p>
-                  <p className="font-semibold text-lg">
-                    {instituteInfo.name || "Not Set"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Email</p>
-                  <p className="font-semibold text-lg">
-                    {instituteInfo.email || "Not Set"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Created At</p>
-                  <p className="font-semibold text-lg">
-                    {instituteInfo.created_at
-                      ? new Date(instituteInfo.created_at).toLocaleDateString()
-                      : "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Login Status</p>
-                  <p className="font-semibold text-green-600">Active</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Account Type</p>
-                  <p className="font-semibold text-lg">Institute</p>
-                </div>
-              </div>
+                  {/* Password Update Form */}
+                  {showPasswordForm && (
+                    <div className="mb-4 md:mb-6 p-3 md:p-4 bg-gray-50 rounded-lg border-2 border-blue-200">
+                      <h3 className="text-base md:text-lg font-semibold mb-3 md:mb-4 text-gray-700">
+                        Change Password
+                      </h3>
+                      <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Current Password *
+                          </label>
+                          <input
+                            type="password"
+                            name="currentPassword"
+                            value={passwordData.currentPassword}
+                            onChange={handlePasswordChange}
+                            className="w-full p-2 border rounded focus:outline-blue-500"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            New Password *
+                          </label>
+                          <input
+                            type="password"
+                            name="newPassword"
+                            value={passwordData.newPassword}
+                            onChange={handlePasswordChange}
+                            className="w-full p-2 border rounded focus:outline-blue-500"
+                            required
+                            minLength={6}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Confirm New Password *
+                          </label>
+                          <input
+                            type="password"
+                            name="confirmPassword"
+                            value={passwordData.confirmPassword}
+                            onChange={handlePasswordChange}
+                            className="w-full p-2 border rounded focus:outline-blue-500"
+                            required
+                            minLength={6}
+                          />
+                        </div>
+                        {passwordError && (
+                          <div className="text-red-600 text-sm">{passwordError}</div>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={passwordLoading}
+                          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:bg-gray-400"
+                        >
+                          {passwordLoading ? "Updating..." : "Update Password"}
+                        </button>
+                      </form>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-gray-600 text-sm mb-1">Institute ID</p>
+                      <p className="font-semibold text-lg">
+                        {instituteInfo.institute_id || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 text-sm mb-1">Institute Name</p>
+                      <p className="font-semibold text-lg">
+                        {instituteInfo.name || "Not Set"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 text-sm mb-1">Email</p>
+                      <p className="font-semibold text-lg">
+                        {instituteInfo.email || "Not Set"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 text-sm mb-1">Created At</p>
+                      <p className="font-semibold text-lg">
+                        {instituteInfo.created_at
+                          ? new Date(instituteInfo.created_at).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 text-sm mb-1">Login Status</p>
+                      <p className="font-semibold text-green-600">Active</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600 text-sm mb-1">Account Type</p>
+                      <p className="font-semibold text-lg">Institute</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

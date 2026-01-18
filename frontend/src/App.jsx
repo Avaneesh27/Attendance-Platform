@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Pages/Login"; // import your Login component
 import Dashboard from "./Pages/Dashboard";
 import Students from "./Pages/Student";
@@ -13,6 +13,8 @@ import Settings from "./Pages/Settings";
 import StudentManagement from "./Pages/StudentManagement";
 import BatchManagement from "./Pages/BatchManagement";
 import StudentProfile from "./Pages/StudentProfile";
+import AdminDashboard from "./Pages/AdminDashboard";
+import ProtectedRoute from "./Components/ProtectedRoute";
 
 function App() {
   return (
@@ -20,20 +22,124 @@ function App() {
       {/* Login page */}
       <Route path="/login" element={<Login />} />
 
-      {/* Main app pages */}
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/students" element={<Students />} />
-      <Route path="/add-student" element={<AddStudent />} />
-      <Route path="/attendance" element={<Attendance />} />
-      <Route path="/update-student" element={<UpdateStudent />} />
-      <Route path="/view-student" element={<ViewStudent />} />
-      <Route path="/search-student" element={<SearchStudent />} />
-      <Route path="/inactive-student" element={<InactiveStudent />} />
-      <Route path="/delete-student" element={<DeleteStudent />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/student-management" element={<StudentManagement />} />
-      <Route path="/batch-management" element={<BatchManagement />} />
-      <Route path="/student-profile/:id" element={<StudentProfile />} />
+      {/* Redirect root to login */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
+      {/* Main app pages - Protected */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/students"
+        element={
+          <ProtectedRoute>
+            <Students />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/add-student"
+        element={
+          <ProtectedRoute>
+            <AddStudent />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/attendance"
+        element={
+          <ProtectedRoute>
+            <Attendance />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/update-student"
+        element={
+          <ProtectedRoute>
+            <UpdateStudent />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/view-student"
+        element={
+          <ProtectedRoute>
+            <ViewStudent />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/search-student"
+        element={
+          <ProtectedRoute>
+            <SearchStudent />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inactive-student"
+        element={
+          <ProtectedRoute>
+            <InactiveStudent />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/delete-student"
+        element={
+          <ProtectedRoute>
+            <DeleteStudent />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student-management"
+        element={
+          <ProtectedRoute>
+            <StudentManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/batch-management"
+        element={
+          <ProtectedRoute>
+            <BatchManagement />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/student-profile/:id"
+        element={
+          <ProtectedRoute>
+            <StudentProfile />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Dashboard for User Role */}
+      <Route
+        path="/admin-dashboard"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Catch-all for wrong routes */}
       <Route

@@ -75,3 +75,34 @@ export const updateInstitutePassword = async (passwordData) => {
   }
 };
 
+// Get all institutes
+export const getAllInstitutes = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(`${API_URL}/institute`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (err) {
+    console.error("Get all institutes API error:", err);
+    throw err;
+  }
+};
+
+// Delete institute
+export const deleteInstitute = async (instituteId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.delete(`${API_URL}/institute/${instituteId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response;
+  } catch (err) {
+    console.error("Delete institute API error:", err);
+    throw err;
+  }
+};

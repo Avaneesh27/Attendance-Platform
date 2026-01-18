@@ -11,24 +11,24 @@ export default function StudentProfile() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const fetchStudentProfile = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await getStudentById(id);
+        setStudent(res.data);
+      } catch (err) {
+        setError("Failed to load student profile");
+        console.error("Error fetching student:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (id) {
       fetchStudentProfile();
     }
   }, [id]);
-
-  const fetchStudentProfile = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await getStudentById(id);
-      setStudent(res.data);
-    } catch (err) {
-      setError("Failed to load student profile");
-      console.error("Error fetching student:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -139,11 +139,10 @@ export default function StudentProfile() {
                 <div>
                   <p className="text-gray-600 text-sm mb-1">Status</p>
                   <p
-                    className={`font-semibold text-lg ${
-                      (student.status === "ACTIVE" || !student.status)
+                    className={`font-semibold text-lg ${(student.status === "ACTIVE" || !student.status)
                         ? "text-green-600"
                         : "text-red-600"
-                    }`}
+                      }`}
                   >
                     {student.status || "ACTIVE"}
                   </p>
@@ -242,50 +241,50 @@ export default function StudentProfile() {
               student.motherName ||
               student.fatherMobile ||
               student.motherMobile) && (
-              <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-3 md:mb-4">
-                  Parent Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                  {student.fatherName && (
-                    <div>
-                      <p className="text-gray-600 text-sm mb-1">Father Name</p>
-                      <p className="font-semibold text-lg">
-                        {student.fatherName}
-                      </p>
-                    </div>
-                  )}
-                  {student.fatherMobile && (
-                    <div>
-                      <p className="text-gray-600 text-sm mb-1">
-                        Father Mobile
-                      </p>
-                      <p className="font-semibold text-lg">
-                        {student.fatherMobile}
-                      </p>
-                    </div>
-                  )}
-                  {student.motherName && (
-                    <div>
-                      <p className="text-gray-600 text-sm mb-1">Mother Name</p>
-                      <p className="font-semibold text-lg">
-                        {student.motherName}
-                      </p>
-                    </div>
-                  )}
-                  {student.motherMobile && (
-                    <div>
-                      <p className="text-gray-600 text-sm mb-1">
-                        Mother Mobile
-                      </p>
-                      <p className="font-semibold text-lg">
-                        {student.motherMobile}
-                      </p>
-                    </div>
-                  )}
+                <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t">
+                  <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-3 md:mb-4">
+                    Parent Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    {student.fatherName && (
+                      <div>
+                        <p className="text-gray-600 text-sm mb-1">Father Name</p>
+                        <p className="font-semibold text-lg">
+                          {student.fatherName}
+                        </p>
+                      </div>
+                    )}
+                    {student.fatherMobile && (
+                      <div>
+                        <p className="text-gray-600 text-sm mb-1">
+                          Father Mobile
+                        </p>
+                        <p className="font-semibold text-lg">
+                          {student.fatherMobile}
+                        </p>
+                      </div>
+                    )}
+                    {student.motherName && (
+                      <div>
+                        <p className="text-gray-600 text-sm mb-1">Mother Name</p>
+                        <p className="font-semibold text-lg">
+                          {student.motherName}
+                        </p>
+                      </div>
+                    )}
+                    {student.motherMobile && (
+                      <div>
+                        <p className="text-gray-600 text-sm mb-1">
+                          Mother Mobile
+                        </p>
+                        <p className="font-semibold text-lg">
+                          {student.motherMobile}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Action Buttons */}
             <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t flex flex-wrap gap-2 md:gap-3">
